@@ -1,0 +1,54 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Администратор" as Admin
+actor "Читатель" as Reader
+
+rectangle "LibTrack — Учёт книг и авторов" {
+    usecase "Авторизация\n(как администратор)" as AuthAdmin
+    usecase "Просмотреть\nкниги" as ViewBooks
+    usecase "Поиск книги" as SearchBook
+    usecase "Просмотр\nинформации об\nавторе" as ViewAuthorInfo
+    usecase "Авторизация\n(как пользователь)" as AuthUser
+
+    usecase "Добавить книгу" as AddBook
+    usecase "Изменить книгу" as EditBook
+    usecase "Удалить книгу" as DeleteBook
+
+    usecase "Добавить автора" as AddAuthor
+    usecase "Изменить автора" as EditAuthor
+    usecase "Удалить автора" as DeleteAuthor
+
+    usecase "Связать книгу с\nавтором" as LinkBookAuthor
+    usecase "Просмотреть\nбронирования" as ViewReservationsAdmin
+    usecase "Регистрация\nпользователей" as RegisterUsers
+
+    usecase "Забронировать\nкнигу" as BookBook
+    usecase "Просмотреть свои\nбронирования" as ViewMyReservations
+}
+
+' Связи для Администратора
+Admin -- AuthAdmin
+Admin -- ViewBooks
+Admin -- SearchBook
+Admin -- ViewAuthorInfo
+Admin -- AddBook
+Admin -- EditBook
+Admin -- DeleteBook
+Admin -- AddAuthor
+Admin -- EditAuthor
+Admin -- DeleteAuthor
+Admin -- LinkBookAuthor
+Admin -- ViewReservationsAdmin
+Admin -- RegisterUsers
+
+' Связи для Читателя
+AuthUser -- Reader
+ViewBooks -- Reader
+SearchBook -- Reader
+ViewAuthorInfo -- Reader
+BookBook -- Reader
+ViewMyReservations -- Reader
+
+@enduml
