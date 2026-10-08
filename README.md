@@ -54,3 +54,8 @@
 ### 2.1 Use Case диаграмма
 
 ![Use Case диаграмма](docs/diagrams/diagram.png)
+
+## Запуск программы
+Перейти в корневую папку проекта в терминале и вписать:
+
+python src/main.py
