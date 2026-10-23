@@ -62,4 +62,4 @@ python src/main.py
 
 ### Эр-диаграмма базы данных «Учет книг и авторов»
 
-![ER-диаграмма](docs/diagrams/er-diagramma.png)
+![ER-диаграмма](docs/diagrams/er-diagramma2.png)
