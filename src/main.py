@@ -1,19 +1,14 @@
-import sqlite3
 import os
+import sqlite3
 
-db_path = os.path.join(os.path.dirname(__file__), 'library.db')
+dir_path = os.path.dirname(__file__)
+db_path = os.path.join(dir_path, 'library.db')
+sql_path = os.path.join(dir_path, 'schema.sql')
 
-conn = sqlite3.connect(db_path)
-cursor = conn.cursor()
+with sqlite3.connect(db_path) as conn:
+    cursor = conn.cursor()
+    cursor.executescript(open(sql_path, encoding='utf-8').read())
 
-cursor.execute("SELECT * FROM Books")
-books = cursor.fetchall()
-
-for book in books:
-    print(book)
-
-conn.commit()
-conn.close()
-
-
-
+    cursor.execute("SELECT * FROM Books")
+    for book in cursor.fetchall():
+        print(book)
