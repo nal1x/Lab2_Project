@@ -12,10 +12,7 @@ def init_db():
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     sql_path = os.path.join(base_dir, 'schema.sql')
     conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT count(name) FROM sqlite_master WHERE type='table' AND name IN ('Roles', 'Authors', 'Users', 'Books', 'Bookings')")
-    if cur.fetchone()[0] != 5:
-        with open(sql_path, 'r', encoding='utf-8') as f:
-            conn.executescript(f.read())
-        conn.commit()
+    with open(sql_path, 'r', encoding='utf-8') as f:
+        conn.executescript(f.read())
+    conn.commit()
     conn.close()

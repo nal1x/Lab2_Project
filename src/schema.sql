@@ -1,22 +1,16 @@
-DROP TABLE IF EXISTS Bookings;
-DROP TABLE IF EXISTS Books;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Authors;
-DROP TABLE IF EXISTS Roles;
-
-CREATE TABLE Roles (
+CREATE TABLE IF NOT EXISTS Roles (
     role_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL
 );
 
-CREATE TABLE Authors (
+CREATE TABLE IF NOT EXISTS Authors (
     author_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     surname TEXT NOT NULL,
     patronymic TEXT
 );
 
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
     user_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     surname TEXT NOT NULL,
@@ -27,7 +21,7 @@ CREATE TABLE Users (
     FOREIGN KEY (role_id) REFERENCES Roles (role_id)
 );
 
-CREATE TABLE Books (
+CREATE TABLE IF NOT EXISTS Books (
     book_id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     author_id INTEGER NOT NULL,
@@ -35,7 +29,7 @@ CREATE TABLE Books (
     FOREIGN KEY (author_id) REFERENCES Authors (author_id)
 );
 
-CREATE TABLE Bookings (
+CREATE TABLE IF NOT EXISTS Bookings (
     booking_id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
     book_id INTEGER NOT NULL,
@@ -45,15 +39,15 @@ CREATE TABLE Bookings (
     FOREIGN KEY (book_id) REFERENCES Books (book_id)
 );
 
-INSERT INTO Roles (name) VALUES ('Администратор'), ('Читатель');
+INSERT OR IGNORE INTO Roles (role_id, name) VALUES (1, 'Администратор'), (2, 'Читатель');
 
-INSERT INTO Authors (name, surname, patronymic) VALUES ('Федор', 'Достоевский', 'Михайлович'), ('Лев', 'Толстой', 'Николаевич');
+INSERT OR IGNORE INTO Authors (author_id, name, surname, patronymic) VALUES (1, 'Федор', 'Достоевский', 'Михайлович'), (2, 'Лев', 'Толстой', 'Николаевич');
 
-INSERT INTO Users (name, surname, patronymic, role_id, login, password) VALUES
-('Алексей', 'Смирнов', '', 1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
-('Иван', 'Иванов', 'Иванович', 2, 'ivan', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
-('Анна', 'Петрова', 'Сергеевна', 2, 'anna', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+INSERT OR IGNORE INTO Users (user_id, name, surname, patronymic, role_id, login, password) VALUES
+(1, 'Алексей', 'Смирнов', '', 1, 'admin', 'salt$63c0a5ea6c4cb71c77573f0896fa2c30045e7f1bf5de93b95ce7d432320b2241'),
+(2, 'Иван', 'Иванов', 'Иванович', 2, 'ivan', 'salt$0c6eef9dd40e599e3a6c507c57659556db2908865c3b99eb01d1c5d3363e792c'),
+(3, 'Анна', 'Петрова', 'Сергеевна', 2, 'anna', 'salt$0c6eef9dd40e599e3a6c507c57659556db2908865c3b99eb01d1c5d3363e792c');
 
-INSERT INTO Books (title, author_id, genre) VALUES ('Преступление и наказание', 1, 'Роман'), ('Война и мир', 2, 'Роман-эпопея');
+INSERT OR IGNORE INTO Books (book_id, title, author_id, genre) VALUES (1, 'Преступление и наказание', 1, 'Роман'), (2, 'Война и мир', 2, 'Роман-эпопея');
 
-INSERT INTO Bookings (user_id, book_id, booking_start_date, end_date_of_booking) VALUES (2, 1, '25.10.2026', '08.11.2026'), (3, 2, '26.10.2026', '09.11.2026');
+INSERT OR IGNORE INTO Bookings (booking_id, user_id, book_id, booking_start_date, end_date_of_booking) VALUES (1, 2, 1, '25.10.2026', '08.11.2026'), (2, 3, 2, '26.10.2026', '09.11.2026');
