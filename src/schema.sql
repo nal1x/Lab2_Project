@@ -22,6 +22,8 @@ CREATE TABLE Users (
     surname TEXT NOT NULL,
     patronymic TEXT,
     role_id INTEGER NOT NULL,
+    login TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
     FOREIGN KEY (role_id) REFERENCES Roles (role_id)
 );
 
@@ -43,22 +45,8 @@ CREATE TABLE Bookings (
     FOREIGN KEY (book_id) REFERENCES Books (book_id)
 );
 
-INSERT INTO Roles (name) VALUES
-('Администратор'),
-('Читатель');
-
-INSERT INTO Authors (name, surname, patronymic) VALUES
-('Федор', 'Достоевский', 'Михайлович'),
-('Лев', 'Толстой', 'Николаевич');
-
-INSERT INTO Users (name, surname, patronymic, role_id) VALUES
-('Иван', 'Иванов', 'Иванович', 2),
-('Анна', 'Петрова', 'Сергеевна', 2);
-
-INSERT INTO Books (title, author_id, genre) VALUES
-('Преступление и наказание', 1, 'Роман'),
-('Война и мир', 2, 'Роман-эпопея');
-
-INSERT INTO Bookings (user_id, book_id, booking_start_date, end_date_of_booking) VALUES
-(1, 1, '25.10.2026', '08.11.2026'),
-(2, 2, '26.10.2026', '09.11.2026');
+INSERT INTO Roles (name) VALUES ('Администратор'), ('Читатель');
+INSERT INTO Authors (name, surname, patronymic) VALUES ('Федор', 'Достоевский', 'Михайлович'), ('Лев', 'Толстой', 'Николаевич');
+INSERT INTO Users (name, surname, patronymic, role_id, login, password) VALUES ('Алексей', 'Смирнов', '', 1, 'admin', 'admin123'), ('Иван', 'Иванов', 'Иванович', 2, 'ivan', '1234'), ('Анна', 'Петрова', 'Сергеевна', 2, 'anna', '1234');
+INSERT INTO Books (title, author_id, genre) VALUES ('Преступление и наказание', 1, 'Роман'), ('Война и мир', 2, 'Роман-эпопея');
+INSERT INTO Bookings (user_id, book_id, booking_start_date, end_date_of_booking) VALUES (2, 1, '25.10.2026', '08.11.2026'), (3, 2, '26.10.2026', '09.11.2026');

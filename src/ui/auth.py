@@ -1,14 +1,11 @@
 from services import user_service
 
-
 def login():
     print("\n===== АВТОРИЗАЦИЯ =====")
-    name = input("Введите ваше имя: ")
-    surname = input("Введите вашу фамилию: ")
-
+    login_val = input("Логин: ")
+    password_val = input("Пароль: ")
     try:
-        user = user_service.authenticate(name, surname)
-        return user
+        return user_service.authenticate(login_val, password_val)
     except Exception as e:
-        print(f"Ошибка входа: {e}")
+        print(f"Ошибка: {e}")
         return None

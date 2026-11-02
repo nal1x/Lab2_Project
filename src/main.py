@@ -12,10 +12,12 @@ with sqlite3.connect(db_path) as conn:
     cursor.execute("SELECT * FROM Books")
     for book in cursor.fetchall():
         print(book)"""
+from database.database import init_db
 from ui.auth import login
 from ui.menu import admin_menu, reader_menu
 
 if __name__ == "__main__":
+    init_db()
     while True:
         user = login()
         if user:
@@ -23,7 +25,5 @@ if __name__ == "__main__":
                 admin_menu(user)
             elif user.role_id == 2:
                 reader_menu(user)
-        retry = input("\nХотите войти снова? (1 - да, 0 - выход из программы): ")
-        if retry == "0":
-            print("Завершение работы программы...")
+        if input("\nВойти снова? (1-да, 0-нет): ") == "0":
             break

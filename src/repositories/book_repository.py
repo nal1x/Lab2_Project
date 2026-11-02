@@ -7,10 +7,7 @@ def _map(row) -> Book:
 def create(title: str, author_id: int, genre: str):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO Books(title, author_id, genre)
-        VALUES (?, ?, ?)
-    """, (title, author_id, genre))
+    cur.execute("INSERT INTO Books(title, author_id, genre) VALUES (?, ?, ?)", (title, author_id, genre))
     conn.commit()
     conn.close()
 
@@ -21,3 +18,25 @@ def get_all() -> list[Book]:
     rows = cur.fetchall()
     conn.close()
     return [_map(r) for r in rows]
+
+def get_by_id(book_id: int) -> Book | None:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT book_id, title, author_id, genre FROM Books WHERE book_id = ?", (book_id,))
+    row = cur.fetchone()
+    conn.close()
+    return _map(row) if row else None
+
+def update(book_id: int, title: str, author_id: int, genre: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE Books SET title = ?, author_id = ?, genre = ? WHERE book_id = ?", (title, author_id, genre, book_id))
+    conn.commit()
+    conn.close()
+
+def delete(book_id: int):
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM Books WHERE book_id = ?", (book_id,))
+    conn.commit()
+    conn.close()

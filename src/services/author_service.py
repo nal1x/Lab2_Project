@@ -1,17 +1,19 @@
 from repositories import author_repository
 
-
 def create_author(name: str, surname: str, patronymic: str | None):
-    if not name.strip():
-        raise Exception("Имя не может быть пустым")
-    if not surname.strip():
-        raise Exception("Фамилия не может быть пустой")
-
-    authors = author_repository.get_all()
-    for a in authors:
-        if (a.name.lower() == name.lower() and
-                a.surname.lower() == surname.lower() and
-                (a.patronymic or "").lower() == (patronymic or "").lower()):
-            raise Exception("Автор уже существует")
-
+    if not name.strip() or not surname.strip():
+        raise Exception("Имя и фамилия не могут быть пустыми")
     author_repository.create(name, surname, patronymic)
+
+def get_all():
+    return author_repository.get_all()
+
+def update_author(author_id: int, name: str, surname: str, patronymic: str | None):
+    if not author_repository.get_by_id(author_id):
+        raise Exception("Автор не найден")
+    author_repository.update(author_id, name, surname, patronymic)
+
+def delete_author(author_id: int):
+    if not author_repository.get_by_id(author_id):
+        raise Exception("Автор не найден")
+    author_repository.delete(author_id)

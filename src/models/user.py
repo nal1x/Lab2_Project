@@ -7,3 +7,5 @@ class User:
     surname: str
     patronymic: str | None
     role_id: int
+    login: str
+    password: str
