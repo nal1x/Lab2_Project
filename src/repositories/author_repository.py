@@ -27,6 +27,17 @@ def get_by_id(author_id: int) -> Author | None:
     conn.close()
     return _map(row) if row else None
 
+def get_exact(name: str, surname: str, patronymic: str | None) -> Author | None:
+    conn = get_connection()
+    cur = conn.cursor()
+    if patronymic:
+        cur.execute("SELECT author_id, name, surname, patronymic FROM Authors WHERE name = ? AND surname = ? AND patronymic = ?", (name, surname, patronymic))
+    else:
+        cur.execute("SELECT author_id, name, surname, patronymic FROM Authors WHERE name = ? AND surname = ? AND patronymic IS NULL", (name, surname))
+    row = cur.fetchone()
+    conn.close()
+    return _map(row) if row else None
+
 def update(author_id: int, name: str, surname: str, patronymic: str | None):
     conn = get_connection()
     cur = conn.cursor()
