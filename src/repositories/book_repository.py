@@ -40,3 +40,11 @@ def delete(book_id: int):
     cur.execute("DELETE FROM Books WHERE book_id = ?", (book_id,))
     conn.commit()
     conn.close()
+
+def search_by_title(title: str) -> list[Book]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT book_id, title, author_id, genre FROM Books WHERE title LIKE ?", ('%' + title + '%',))
+    rows = cur.fetchall()
+    conn.close()
+    return [_map(r) for r in rows]

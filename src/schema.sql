@@ -46,7 +46,14 @@ CREATE TABLE Bookings (
 );
 
 INSERT INTO Roles (name) VALUES ('Администратор'), ('Читатель');
+
 INSERT INTO Authors (name, surname, patronymic) VALUES ('Федор', 'Достоевский', 'Михайлович'), ('Лев', 'Толстой', 'Николаевич');
-INSERT INTO Users (name, surname, patronymic, role_id, login, password) VALUES ('Алексей', 'Смирнов', '', 1, 'admin', 'admin123'), ('Иван', 'Иванов', 'Иванович', 2, 'ivan', '1234'), ('Анна', 'Петрова', 'Сергеевна', 2, 'anna', '1234');
+
+INSERT INTO Users (name, surname, patronymic, role_id, login, password) VALUES
+('Алексей', 'Смирнов', '', 1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9'),
+('Иван', 'Иванов', 'Иванович', 2, 'ivan', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4'),
+('Анна', 'Петрова', 'Сергеевна', 2, 'anna', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4');
+
 INSERT INTO Books (title, author_id, genre) VALUES ('Преступление и наказание', 1, 'Роман'), ('Война и мир', 2, 'Роман-эпопея');
+
 INSERT INTO Bookings (user_id, book_id, booking_start_date, end_date_of_booking) VALUES (2, 1, '25.10.2026', '08.11.2026'), (3, 2, '26.10.2026', '09.11.2026');

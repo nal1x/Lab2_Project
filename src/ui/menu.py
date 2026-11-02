@@ -27,7 +27,7 @@ def admin_authors_menu():
 def admin_books_menu():
     while True:
         print("\n--- Книги ---")
-        print("1. Добавить\n2. Все книги\n3. Обновить\n4. Удалить\n0. Назад")
+        print("1. Добавить\n2. Все книги\n3. Поиск книги\n4. Обновить\n5. Удалить\n0. Назад")
         c = input("Выбор: ")
         if c == "1":
             try:
@@ -38,10 +38,17 @@ def admin_books_menu():
             for b in book_service.get_all(): print(f"[{b.book_id}] {b.title}")
         elif c == "3":
             try:
+                title = input("Введите название для поиска: ")
+                books = book_service.search_books(title)
+                if not books: print("Ничего не найдено")
+                for b in books: print(f"[{b.book_id}] {b.title}")
+            except Exception as e: print(e)
+        elif c == "4":
+            try:
                 book_service.update_book(int(input("ID: ")), input("Название: "), int(input("ID автора: ")), input("Жанр: "))
                 print("Успех")
             except Exception as e: print(e)
-        elif c == "4":
+        elif c == "5":
             try:
                 book_service.delete_book(int(input("ID: ")))
                 print("Успех")
@@ -110,11 +117,31 @@ def admin_menu(user):
 def reader_menu(user):
     while True:
         print(f"\n===== ЧИТАТЕЛЬ ({user.login}) =====")
-        print("1. Список книг\n2. Мои бронирования\n0. Выход")
+        print("1. Список всех книг\n2. Найти книгу\n3. Забронировать книгу\n4. Мои бронирования\n0. Выход")
         c = input("Выбор: ")
         if c == "1":
-            for b in book_service.get_all(): print(f"[{b.book_id}] {b.title}")
+            for b in book_service.get_all(): print(f"[{b.book_id}] {b.title} (Жанр: {b.genre})")
         elif c == "2":
+            title = input("Введите название для поиска: ")
+            try:
+                books = book_service.search_books(title)
+                if not books: print("Ничего не найдено")
+                for b in books: print(f"[{b.book_id}] {b.title}")
+            except Exception as e: print(e)
+        elif c == "3":
+            try:
+                book_id = int(input("Введите ID книги: "))
+                start_date = input("Дата начала (ДД.ММ.ГГГГ): ")
+                end_date = input("Дата окончания (ДД.ММ.ГГГГ): ")
+                booking_service.create_booking(user.user_id, book_id, start_date, end_date)
+                print("Успех: Книга забронирована!")
+            except ValueError:
+                print("Ошибка: ID книги должен быть числом")
+            except Exception as e:
+                print(f"Ошибка: {e}")
+        elif c == "4":
             bkgs = booking_service.get_by_user(user.user_id)
-            for b in bkgs: print(f"Книга {b.book_id} | {b.booking_start_date} - {b.end_date_of_booking}")
+            if not bkgs:
+                print("У вас нет активных бронирований.")
+            for b in bkgs: print(f"Книга ID {b.book_id} | {b.booking_start_date} - {b.end_date_of_booking}")
         elif c == "0": break

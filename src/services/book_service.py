@@ -21,3 +21,8 @@ def delete_book(book_id: int):
     if not book_repository.get_by_id(book_id):
         raise Exception("Книга не найдена")
     book_repository.delete(book_id)
+
+def search_books(title: str):
+    if not title.strip():
+        raise Exception("Строка поиска пуста")
+    return book_repository.search_by_title(title)

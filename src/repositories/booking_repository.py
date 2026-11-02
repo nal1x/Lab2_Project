@@ -48,3 +48,11 @@ def delete(booking_id: int):
     cur.execute("DELETE FROM Bookings WHERE booking_id = ?", (booking_id,))
     conn.commit()
     conn.close()
+
+def get_by_book(book_id: int) -> list[Booking]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT booking_id, user_id, book_id, booking_start_date, end_date_of_booking FROM Bookings WHERE book_id = ?", (book_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return [_map(r) for r in rows]
