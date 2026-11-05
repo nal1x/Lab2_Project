@@ -27,6 +27,14 @@ def get_by_id(book_id: int) -> Book | None:
     conn.close()
     return _map(row) if row else None
 
+def get_by_author(author_id: int) -> list[Book]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT book_id, title, author_id, genre FROM Books WHERE author_id = ?", (author_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return [_map(r) for r in rows]
+
 def update(book_id: int, title: str, author_id: int, genre: str):
     conn = get_connection()
     cur = conn.cursor()
