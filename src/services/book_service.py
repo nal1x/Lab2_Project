@@ -11,10 +11,10 @@ def get_all():
     return book_repository.get_all()
 
 def update_book(book_id: int, title: str, author_id: int, genre: str):
-    if not title.strip() or not genre.strip():
-        raise Exception("Название и жанр не могут быть пустыми")
     if not book_repository.get_by_id(book_id):
         raise Exception("Книга не найдена")
+    if not title.strip() or not genre.strip():
+        raise Exception("Название и жанр не могут быть пустыми")
     if not author_repository.get_by_id(author_id):
         raise Exception("Автор с таким ID не существует")
     book_repository.update(book_id, title, author_id, genre)

@@ -14,15 +14,25 @@ def admin_authors_menu():
             for a in author_service.get_all(): print(f"[{a.author_id}] {a.surname} {a.name}")
         elif c == "3":
             try:
-                author_service.update_author(int(input("ID: ")), input("Имя: "), input("Фамилия: "), input("Отчество: ") or None)
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                author_service.update_author(int(raw_id), input("Имя: "), input("Фамилия: "), input("Отчество: ") or None)
                 print("Успех")
             except Exception as e: print(e)
         elif c == "4":
             try:
-                author_service.delete_author(int(input("ID: ")))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                author_service.delete_author(int(raw_id))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")
 
 def admin_books_menu():
     while True:
@@ -31,7 +41,11 @@ def admin_books_menu():
         c = input("Выбор: ")
         if c == "1":
             try:
-                book_service.create_book(input("Название: "), int(input("ID автора: ")), input("Жанр: "))
+                raw_author_id = input("ID автора: ")
+                if not raw_author_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                book_service.create_book(input("Название: "), int(raw_author_id), input("Жанр: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "2":
@@ -45,15 +59,29 @@ def admin_books_menu():
             except Exception as e: print(e)
         elif c == "4":
             try:
-                book_service.update_book(int(input("ID: ")), input("Название: "), int(input("ID автора: ")), input("Жанр: "))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                raw_author_id = input("ID автора: ")
+                if not raw_author_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                book_service.update_book(int(raw_id), input("Название: "), int(raw_author_id), input("Жанр: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "5":
             try:
-                book_service.delete_book(int(input("ID: ")))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                book_service.delete_book(int(raw_id))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")
 
 def admin_users_menu():
     while True:
@@ -62,22 +90,40 @@ def admin_users_menu():
         c = input("Выбор: ")
         if c == "1":
             try:
-                user_service.create_user(input("Имя: "), input("Фамилия: "), input("Отчество: ") or None, int(input("Роль (1-Админ,2-Читатель): ")), input("Логин: "), input("Пароль: "))
+                raw_role_id = input("Роль (1-Админ,2-Читатель): ")
+                if not raw_role_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                user_service.create_user(input("Имя: "), input("Фамилия: "), input("Отчество: ") or None, int(raw_role_id), input("Логин: "), input("Пароль: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "2":
             for u in user_service.get_all(): print(f"[{u.user_id}] {u.login} (Роль: {u.role_id})")
         elif c == "3":
             try:
-                user_service.update_user(int(input("ID: ")), input("Имя: "), input("Фамилия: "), input("Отчество: ") or None, int(input("Роль: ")), input("Логин: "), input("Пароль: "))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                raw_role_id = input("Роль: ")
+                if not raw_role_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                user_service.update_user(int(raw_id), input("Имя: "), input("Фамилия: "), input("Отчество: ") or None, int(raw_role_id), input("Логин: "), input("Пароль: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "4":
             try:
-                user_service.delete_user(int(input("ID: ")))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                user_service.delete_user(int(raw_id))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")
 
 def admin_bookings_menu():
     while True:
@@ -86,22 +132,48 @@ def admin_bookings_menu():
         c = input("Выбор: ")
         if c == "1":
             try:
-                booking_service.create_booking(int(input("ID юзера: ")), int(input("ID книги: ")), input("Начало: "), input("Конец: "))
+                raw_user_id = input("ID юзера: ")
+                if not raw_user_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                raw_book_id = input("ID книги: ")
+                if not raw_book_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                booking_service.create_booking(int(raw_user_id), int(raw_book_id), input("Начало: "), input("Конец: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "2":
             for b in booking_service.get_all(): print(f"[{b.booking_id}] Юзер {b.user_id}, Книга {b.book_id}")
         elif c == "3":
             try:
-                booking_service.update_booking(int(input("ID: ")), int(input("ID юзера: ")), int(input("ID книги: ")), input("Начало: "), input("Конец: "))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                raw_user_id = input("ID юзера: ")
+                if not raw_user_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                raw_book_id = input("ID книги: ")
+                if not raw_book_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                booking_service.update_booking(int(raw_id), int(raw_user_id), int(raw_book_id), input("Начало: "), input("Конец: "))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "4":
             try:
-                booking_service.delete_booking(int(input("ID: ")))
+                raw_id = input("ID: ")
+                if not raw_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
+                booking_service.delete_booking(int(raw_id))
                 print("Успех")
             except Exception as e: print(e)
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")
 
 def admin_menu(user):
     while True:
@@ -113,6 +185,8 @@ def admin_menu(user):
         elif c == "3": admin_users_menu()
         elif c == "4": admin_bookings_menu()
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")
 
 def reader_menu(user):
     while True:
@@ -130,13 +204,14 @@ def reader_menu(user):
             except Exception as e: print(e)
         elif c == "3":
             try:
-                book_id = int(input("Введите ID книги: "))
+                raw_book_id = input("Введите ID книги: ")
+                if not raw_book_id.isdigit():
+                    print("неверный формат ввода данных")
+                    continue
                 start_date = input("Дата начала (ДД.ММ.ГГГГ): ")
                 end_date = input("Дата окончания (ДД.ММ.ГГГГ): ")
-                booking_service.create_booking(user.user_id, book_id, start_date, end_date)
+                booking_service.create_booking(user.user_id, int(raw_book_id), start_date, end_date)
                 print("Успех: Книга забронирована!")
-            except ValueError:
-                print("Ошибка: ID книги должен быть числом")
             except Exception as e:
                 print(f"Ошибка: {e}")
         elif c == "4":
@@ -145,3 +220,5 @@ def reader_menu(user):
                 print("У вас нет активных бронирований.")
             for b in bkgs: print(f"Книга ID {b.book_id} | {b.booking_start_date} - {b.end_date_of_booking}")
         elif c == "0": break
+        else:
+            print("неверный формат ввода данных")

@@ -33,10 +33,10 @@ def authenticate(login_val: str, password_val: str):
     return user
 
 def update_user(user_id: int, name: str, surname: str, patronymic: str | None, role_id: int, login: str, password: str):
-    if not name.strip() or not surname.strip() or not login.strip() or not password.strip():
-        raise Exception("Поля имя, фамилия, логин и пароль обязательны")
     if not user_repository.get_by_id(user_id):
         raise Exception("Пользователь не найден")
+    if not name.strip() or not surname.strip() or not login.strip() or not password.strip():
+        raise Exception("Поля имя, фамилия, логин и пароль обязательны")
     if not role_repository.get_by_id(role_id):
         raise Exception("Указанная роль не существует")
     existing_user = user_repository.get_by_login(login)
