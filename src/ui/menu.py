@@ -1,7 +1,7 @@
 from services import author_service, book_service, user_service, booking_service
 
 def _check_id(raw_id: str) -> bool:
-    return raw_id.strip().isdigit() and ' ' not in raw_id
+    return raw_id.strip().isdigit()
 
 def admin_authors_menu():
     while True:

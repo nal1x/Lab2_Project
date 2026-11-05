@@ -10,6 +10,8 @@ def _parse_and_validate_dates(start_str: str, end_str: str) -> tuple[datetime, d
         raise Exception("Неверный формат даты. Используйте ДД.ММ.ГГГГ")
     if start_dt.date() < datetime.now().date():
         raise Exception("Нельзя забронировать книгу на прошедшую дату")
+    if end_dt.date() < datetime.now().date():
+        raise Exception("Дата окончания не может быть в прошлом")
     if start_dt > end_dt:
         raise Exception("Дата начала не может быть позже даты окончания")
     return start_dt, end_dt

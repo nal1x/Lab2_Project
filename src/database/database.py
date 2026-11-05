@@ -23,15 +23,12 @@ def init_db():
             conn.executescript(f.read())
         conn.commit()
 
-        from services import user_service, booking_service
+        from services import user_service
         try:
             if not user_service.get_all():
                 user_service.create_user('Алексей', 'Смирнов', '', 1, 'admin', 'admin123')
                 user_service.create_user('Иван', 'Иванов', 'Иванович', 2, 'ivan', '1234')
                 user_service.create_user('Анна', 'Петрова', 'Сергеевна', 2, 'anna', '1234')
-            if not booking_service.get_all():
-                booking_service.create_booking(2, 1, '25.10.2026', '08.11.2026')
-                booking_service.create_booking(3, 2, '26.10.2026', '09.11.2026')
         except Exception:
             pass
 
