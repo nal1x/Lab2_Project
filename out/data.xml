@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Books_list>
+    <Books>
+        <book_id>1</book_id>
+        <title>Преступление и наказание</title>
+        <genre>Роман</genre>
+        <author>
+            <author_id>1</author_id>
+            <name>Федор</name>
+            <surname>Достоевский</surname>
+            <patronymic>Михайлович</patronymic>
+        </author>
+    </Books>
+    <Books>
+        <book_id>2</book_id>
+        <title>Война и мир</title>
+        <genre>Роман-эпопея</genre>
+        <author>
+            <author_id>2</author_id>
+            <name>Лев</name>
+            <surname>Толстой</surname>
+            <patronymic>Николаевич</patronymic>
+        </author>
+    </Books>
+</Books_list>

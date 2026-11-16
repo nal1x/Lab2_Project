@@ -1,9 +1,11 @@
 from database.database import init_db
 from ui.auth import login
 from ui.menu import admin_menu, reader_menu
+from export_data import auto_export
 
 if __name__ == "__main__":
     init_db()
+    auto_export("Books")
     while True:
         user = login()
         if user:
