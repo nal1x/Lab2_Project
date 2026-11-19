@@ -2,6 +2,7 @@
 import csv
 import json
 import os
+import re
 import xml.etree.ElementTree as ET
 
 import yaml
@@ -10,10 +11,33 @@ import database.database as db
 
 
 def quote_identifier(name):
-    return '"' + name.replace('"', '""') + '"'
+    """Безопасное оформление имён таблиц и столбцов."""
+    return '"' + str(name).replace('"', '""') + '"'
+
+
+def find_table_with_relations(cursor):
+    """Поиск таблицы с внешними ключами."""
+    cursor.execute(
+        "SELECT name FROM sqlite_master "
+        "WHERE type = 'table' AND name NOT LIKE 'sqlite_%' "
+        "ORDER BY name"
+    )
+
+    tables = [row[0] for row in cursor.fetchall()]
+
+    for table_name in tables:
+        cursor.execute(
+            f"PRAGMA foreign_key_list({quote_identifier(table_name)})"
+        )
+
+        if cursor.fetchall():
+            return table_name
+
+    raise ValueError("Не найдена таблица со связями!")
 
 
 def dict_to_xml(parent, data):
+    """Преобразование словаря в XML."""
     for key, value in data.items():
         child = ET.SubElement(parent, str(key))
 
@@ -26,6 +50,7 @@ def dict_to_xml(parent, data):
 
                 if isinstance(item, dict):
                     dict_to_xml(element, item)
+
                 elif item is not None:
                     element.text = str(item)
 
@@ -33,13 +58,16 @@ def dict_to_xml(parent, data):
             child.text = str(value)
 
 
-def get_table_data(table_name):
+def get_table_data(table_name=None):
+    """Получение данных основной и связанных таблиц."""
     conn = db.get_connection()
 
     try:
         cursor = conn.cursor()
 
-        # Проверяем существование таблицы
+        if table_name is None:
+            table_name = find_table_with_relations(cursor)
+
         cursor.execute(
             "SELECT name FROM sqlite_master "
             "WHERE type = 'table' AND name = ?",
@@ -48,21 +76,19 @@ def get_table_data(table_name):
 
         if cursor.fetchone() is None:
             raise ValueError(
-                f"Таблица {table_name} не найдена!"
+                f"Таблица '{table_name}' не найдена!"
             )
 
-        table = quote_identifier(table_name)
+        table_sql = quote_identifier(table_name)
 
-        # Получаем столбцы главной таблицы
-        cursor.execute(f"PRAGMA table_info({table})")
+        cursor.execute(f"PRAGMA table_info({table_sql})")
+        columns = [row[1] for row in cursor.fetchall()]
 
-        columns = [
-            row[1] for row in cursor.fetchall()
-        ]
+        if not columns:
+            raise ValueError("В таблице нет столбцов!")
 
-        # Получаем внешние ключи
         cursor.execute(
-            f"PRAGMA foreign_key_list({table})"
+            f"PRAGMA foreign_key_list({table_sql})"
         )
 
         foreign_keys = cursor.fetchall()
@@ -71,33 +97,35 @@ def get_table_data(table_name):
         join_parts = []
         related_info = []
 
-        # Добавляем столбцы главной таблицы
+        # Получаем столбцы основной таблицы.
         for column in columns:
             select_parts.append(
                 f'main.{quote_identifier(column)} '
-                f'AS "main__{column}"'
+                f'AS {quote_identifier("main__" + column)}'
             )
 
-        # Получаем связанные данные
+        # Получаем информацию о связанных таблицах.
+        used_group_names = set()
+
         for index, fk in enumerate(foreign_keys):
             ref_table = fk[2]
             from_column = fk[3]
             to_column = fk[4]
 
-            alias = f"rel_{index}"
+            alias = f"related_{index}"
 
-            group_name = (
-                from_column[:-3]
-                if from_column.endswith("_id")
-                else ref_table.lower()
-            )
-
-            if group_name in columns:
+            if from_column.endswith("_id"):
+                group_name = from_column[:-3]
+            else:
                 group_name = ref_table.lower()
+
+            if not group_name or group_name in used_group_names:
+                group_name = f"{ref_table.lower()}_{index + 1}"
+
+            used_group_names.add(group_name)
 
             ref_table_sql = quote_identifier(ref_table)
 
-            # Получаем столбцы связанной таблицы
             cursor.execute(
                 f"PRAGMA table_info({ref_table_sql})"
             )
@@ -114,29 +142,32 @@ def get_table_data(table_name):
             })
 
             for column in ref_columns:
+                alias_name = f"{alias}__{column}"
+
                 select_parts.append(
                     f'{alias}.{quote_identifier(column)} '
-                    f'AS "{alias}__{column}"'
+                    f'AS {quote_identifier(alias_name)}'
                 )
 
-            # Создаём связь между таблицами
+            # Связываем таблицы через LEFT JOIN.
             join_parts.append(
-                f'LEFT JOIN {ref_table_sql} {alias} '
-                f'ON main.{quote_identifier(from_column)} '
-                f'= {alias}.{quote_identifier(to_column)}'
+                f"LEFT JOIN {ref_table_sql} {alias} "
+                f"ON main.{quote_identifier(from_column)} "
+                f"= {alias}.{quote_identifier(to_column)}"
             )
 
-        # Формируем SQL-запрос
+        # Формируем SQL-запрос.
         sql = (
-            f'SELECT {", ".join(select_parts)} '
-            f'FROM {table} main '
-            f'{" ".join(join_parts)}'
+            f"SELECT {', '.join(select_parts)} "
+            f"FROM {table_sql} AS main "
+            f"{' '.join(join_parts)}"
         )
 
         cursor.execute(sql)
 
         rows = cursor.fetchall()
-        names = [
+
+        result_columns = [
             column[0] for column in cursor.description
         ]
 
@@ -146,81 +177,79 @@ def get_table_data(table_name):
     nested_data = []
     flat_data = []
 
-    # Формируем данные для JSON, XML и YAML
-    # и отдельные строки для CSV
+    foreign_key_columns = {
+        fk[3] for fk in foreign_keys
+    }
+
+    # Формируем вложенные и плоские данные.
     for row in rows:
         nested_item = {}
         flat_item = {}
 
-        for name, value in zip(names, row):
+        for name, value in zip(result_columns, row):
             if name.startswith("main__"):
-                column = name[6:]
+                column = name[len("main__"):]
 
                 flat_item[column] = value
 
-                # Внешний ключ остаётся в CSV,
-                # но связанная информация будет вложенной
-                if column not in [
-                    fk[3] for fk in foreign_keys
-                ]:
+                if column not in foreign_key_columns:
                     nested_item[column] = value
 
+        # Добавляем информацию связанных таблиц.
         for info in related_info:
-            alias = info["alias"]
-            group_name = info["group"]
-            key_column = info["key"]
-
             related_item = {}
 
             for column in info["columns"]:
-                name = f"{alias}__{column}"
-                value = row[names.index(name)]
+                result_name = f'{info["alias"]}__{column}'
+
+                value = row[result_columns.index(result_name)]
 
                 related_item[column] = value
 
-                # Не дублируем внешний ключ в CSV
-                if column != key_column:
+                if column != info["key"]:
                     flat_item[
-                        f"{group_name}_{column}"
+                        f'{info["group"]}_{column}'
                     ] = value
 
-            # Если связанной записи нет
             if all(
                 value is None
                 for value in related_item.values()
             ):
-                nested_item[group_name] = None
+                nested_item[info["group"]] = None
             else:
-                nested_item[group_name] = related_item
+                nested_item[info["group"]] = related_item
 
         nested_data.append(nested_item)
         flat_data.append(flat_item)
 
-    # Заголовки CSV формируются даже при пустой таблице
+    # Формируем заголовки CSV.
     flat_headers = list(columns)
 
     for info in related_info:
         for column in info["columns"]:
             if column != info["key"]:
-                flat_headers.append(
-                    f'{info["group"]}_{column}'
-                )
+                header = f'{info["group"]}_{column}'
 
-    return nested_data, flat_data, flat_headers
+                if header not in flat_headers:
+                    flat_headers.append(header)
+
+    return table_name, nested_data, flat_data, flat_headers
 
 
-def auto_export(table_name):
-    # Определяем папку проекта
+def auto_export(table_name="Books"):
+    """Экспорт данных в JSON, CSV, XML и YAML."""
+
+    # Определяем папку проекта.
     project_dir = os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))
     )
 
-    # Создаём папку out, если её нет
+    # Создаём папку out.
     out_dir = os.path.join(project_dir, "out")
     os.makedirs(out_dir, exist_ok=True)
 
-    # Получаем данные из базы
-    nested_data, flat_data, flat_headers = (
+    # Получаем данные из базы данных.
+    table_name, nested_data, flat_data, flat_headers = (
         get_table_data(table_name)
     )
 
@@ -235,36 +264,7 @@ def auto_export(table_name):
             indent=4
         )
 
-    # 2. YAML
-    yaml_path = os.path.join(out_dir, "data.yaml")
-
-    with open(yaml_path, "w", encoding="utf-8") as file:
-        yaml.safe_dump(
-            nested_data,
-            file,
-            allow_unicode=True,
-            sort_keys=False
-        )
-
-    # 3. XML
-    root = ET.Element(f"{table_name}_list")
-
-    for item in nested_data:
-        record = ET.SubElement(root, table_name)
-        dict_to_xml(record, item)
-
-    tree = ET.ElementTree(root)
-    ET.indent(tree, space="    ")
-
-    xml_path = os.path.join(out_dir, "data.xml")
-
-    tree.write(
-        xml_path,
-        encoding="utf-8",
-        xml_declaration=True
-    )
-
-    # 4. CSV
+    # 2. CSV
     csv_path = os.path.join(out_dir, "data.csv")
 
     with open(
@@ -281,6 +281,44 @@ def auto_export(table_name):
 
         writer.writeheader()
         writer.writerows(flat_data)
+
+    # 3. XML
+    root_name = re.sub(
+        r"[^A-Za-z0-9_.-]",
+        "_",
+        str(table_name)
+    )
+
+    if not root_name or not re.match(r"[A-Za-z_]", root_name[0]):
+        root_name = "table_" + root_name
+
+    root = ET.Element(f"{root_name}_list")
+
+    for item in nested_data:
+        record = ET.SubElement(root, root_name)
+        dict_to_xml(record, item)
+
+    tree = ET.ElementTree(root)
+    ET.indent(tree, space="    ")
+
+    xml_path = os.path.join(out_dir, "data.xml")
+
+    tree.write(
+        xml_path,
+        encoding="utf-8",
+        xml_declaration=True
+    )
+
+    # 4. YAML
+    yaml_path = os.path.join(out_dir, "data.yaml")
+
+    with open(yaml_path, "w", encoding="utf-8") as file:
+        yaml.safe_dump(
+            nested_data,
+            file,
+            allow_unicode=True,
+            sort_keys=False
+        )
 
     print("Данные успешно экспортированы!")
     print("Созданы файлы:")
